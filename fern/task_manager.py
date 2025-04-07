@@ -1,26 +1,28 @@
 import os
-from datetime import datetime
+from task import Task
+import memory as mem
 
 
 #ID Related Helper Functions ------------------------------------------------------------------------------------------------------
 
-def get_next_id(filepath = "fern/data/last_id.txt"): 
-    #this function will (assuming no OsErrors are found)
-        #increment the last id from file to get the next id
-        #write that id to the file
-        #return the next id
-
+def get_next_id(filepath = "fern/data/last_id.txt"):
+    os.makedirs(os.path.dirname(filepath), exist_ok = True) #checks for the directory (not the file) and creates it if it doesn't exist.
     try:
         with open(filepath, "r") as f:
-            last_id = int(f.read().strip())
+            last_id = f.read().strip()
+        if last_id == "":
+            print(f"{filepath} file empty; IDs will now begin at 1.")
+            last_id = 0
+        elif not last_id.isdigit():
+            print(f"Cannot generate new task ID; {filepath} does not contain a readable ID.")
+            return None
+        else:
+            last_id = int(last_id)
     except FileNotFoundError:
         print(f"{filepath} file not found; generating new file. IDs will now begin at 1.")
         last_id = 0
-    except ValueError: #File exists but is corrupted or empty
-        print(f"Cannot generate new task ID; {filepath} does not contain a readable ID.")
-        return None
     except OSError as e: #Problem with file i/o such as file permissions denied
-        print(f"Cannot generate new task ID; Error opening {filepath} :{e}")
+        print(f"Cannot generate new task ID; error opening {filepath}: {e}")
         return None
 
     next_id = last_id + 1
@@ -32,6 +34,7 @@ def get_next_id(filepath = "fern/data/last_id.txt"):
     
 
     return next_id
+
 
 
 
@@ -56,37 +59,9 @@ def reset_ids(filepath = "fern/data/last_id.txt"):
 
 
 
-#Task Object ----------------------------------------------------------------------------------------------------------------------
-
-class Task:
-    priorities = ["High", "Medium", "Low", None]
-    statuses = ["Ready", "Active", "Stalled", "Completed"] #"Completed" = Archived
-
-    def __init__(self, 
-                 id, 
-                 name, 
-                 priority = 3,
-                 tags = None, 
-                 status = statuses[0], 
-                 created_at = None):
-        self.id = id
-        self.name = name
-        self.priority = Task.priorities[priority]
-        self.tags = tags or []
-        self.status = status
-        self.created_at = created_at or datetime.now().replace(microsecond = 0).isoformat() #time format = "YYYY-MM-DD*T*HH:MM:SS" ignore asterisks
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "priority": self.priority,
-            "tags": self.tags,
-            "status": self.status,
-            "created_at": self.created_at
-        }
+#Creation, Deletion, and Archival Helper Functions --------------------------------------------------------------------------------
 
 
-#Task Storage Helper Functions ----------------------------------------------------------------------------------------------------
-
-
+def create_task(name, priority = None, tags = None, ):
+    #temp func
+    return
