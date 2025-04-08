@@ -5,6 +5,7 @@ import utils as u
 
 tasks_filepath = "fern/tasks/tasks.txt"
 archive_filepath = "fern/tasks/archive.txt"
+last_id_filepath = "fern/data/last_id.txt"
 memory_verbosity = True
 
 #Task Storage Helper Functions: Saving, Perma-Deletion, Archival
@@ -24,8 +25,31 @@ def save_task(task: Task, filepath = tasks_filepath, verbose = memory_verbosity)
 
 
 
-#Parsing Helper Functions: Duplicate Name/ID Searches, Tag Commonality, etc.
+#Memory Access/Writing Helper Functions: Last ID Reading/Writing, Duplicate Name/ID Searches, Tag Commonality, etc.
+
+def get_last_id(filepath = last_id_filepath, verbose = memory_verbosity):
+    try:
+        with open(filepath, "r") as f:
+            last_id = int(f.read().strip())
+        return last_id
+    except (FileNotFoundError, ValueError, OSError): #lastid isn't a number, cant open file, or no file present
+        if verbose:    
+            print(f"{filepath} file corrupted/empty. Must parse tasks.txt for next open ID.")
+        return None
+
+
+def put_last_id(new_id, filepath = last_id_filepath, verbose = memory_verbosity):
+        try:
+            with open(filepath, "w") as f:
+                f.write(str(new_id))
+        except OSError as e:
+            if verbose:
+                print(f"Error creating/writing to {filepath}: {e}")
+        return
+
+
 def get_used_ids(filepath = tasks_filepath, verbose = memory_verbosity):
+    os.makedirs(os.path.dirname(filepath), exist_ok = True)
     seen_ids = set()
     try:
         with open(filepath, "r") as f: #read tasks.txt for seen id's
@@ -44,7 +68,9 @@ def get_used_ids(filepath = tasks_filepath, verbose = memory_verbosity):
     return seen_ids
 
 
+
 def get_used_names(filepath = tasks_filepath, verbose = memory_verbosity):
+    os.makedirs(os.path.dirname(filepath), exist_ok = True)
     seen_names = set()
     try:
         with open(filepath, "r") as f: #read tasks.txt for seen names
